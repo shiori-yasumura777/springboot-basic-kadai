@@ -6,6 +6,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.springkadaiform.form.ContactForm;
 
@@ -16,18 +17,27 @@ public class ContactFormController {
 	@GetMapping("/form")
 	public String form(Model model) {
 		// ビューに空のフォームクラスのインスタンスを渡す
-		model.addAttribute("contactForm", new ContactForm());
-		return "contactFormView"; // contactFormViewを表示する
-	}
+		if (!model.containsAttribute("contactForm")) {
+			model.addAttribute("contactForm", new ContactForm());
+			}
+			
+			return "contactFormView";
+		}
 	
 	// 入力内容を受け取ってバリデーションを行って確認画面へ進
 	@PostMapping("/confirm")
-	public String confirm(Model model, @Validated ContactForm contactForm, BindingResult result) {
+	public String confirm(@Validated 
+						  ContactForm contactForm, 
+						  BindingResult result,
+						  RedirectAttributes redirectAttributes) {
 		
 		// バリデーションエラーの場合
 		if (result.hasErrors()) {
+			
+			redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.contactForm", result);
+			redirectAttributes.addFlashAttribute("contactForm", contactForm);
 			// 元のフォーム画面に戻す
-			return "contactFormView";
+			return "redirect:/form";
 		}
 		
 		
